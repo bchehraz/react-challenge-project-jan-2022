@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
+import { OrderForm } from "../";
 import { SERVER_IP } from "../../private";
 
 const DELETE_ORDER_URL = `${SERVER_IP}/api/delete-order`;
 
 const OrdersList = (props) => {
+  // index of selected order to edit, -1 to cancel
+  const [editIndex, setEditIndex] = useState(-1);
+
   const { orders } = props;
   if (!props || !props.orders || !props.orders.length)
     return (
@@ -26,7 +30,20 @@ const OrdersList = (props) => {
     props.fetchOrders();
   }
 
-  return orders.map((order) => {
+  function showEdit(orderIndex) {
+    setEditIndex(orderIndex);
+  }
+
+  function hideEdit() {
+    setEditIndex(-1);
+  }
+
+  async function onEditSuccess() {
+    await props.fetchOrders();
+    hideEdit();
+  }
+
+  return orders.map((order, index) => {
     const createdDate = new Date(order.createdAt);
     return (
       <div className="row view-order-container" key={order._id}>
@@ -42,7 +59,11 @@ const OrdersList = (props) => {
           <p>Quantity: {order.quantity}</p>
         </div>
         <div className="col-md-4 view-order-right-col">
-          <button className="btn btn-success">Edit</button>
+          {editIndex !== index && (
+            <button className="btn btn-success" onClick={() => showEdit(index)}>
+              Edit
+            </button>
+          )}
           <button
             className="btn btn-danger"
             onClick={() => deleteOrder(order._id)}
@@ -50,6 +71,16 @@ const OrdersList = (props) => {
             Delete
           </button>
         </div>
+
+        {editIndex === index && (
+          <div className="edit-section">
+            <OrderForm
+              order={order}
+              onEditSuccess={onEditSuccess}
+              onCancelEdit={hideEdit}
+            />
+          </div>
+        )}
       </div>
     );
   });
