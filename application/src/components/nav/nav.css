@@ -1,30 +1,41 @@
 #middle-link {
-    border-left: 1px solid #000000;
-    border-right: 1px solid #000000;
+  border-left: 1px solid #000000;
+  border-right: 1px solid #000000;
 }
 
 .nav-label {
-    font-family: "Optima";
-    font-size: 1em;
-    font-weight: bold;
+  font-family: "Optima";
+  font-size: 1em;
+  font-weight: bold;
 }
 
 .nav-link {
-    flex: 1;
-    text-align: center;
+  flex: 1;
+  text-align: center;
 }
 
 .nav-link:hover {
-    background: #E09393;
+  background: #e09393;
 }
 
 .nav-link-style {
-    color: white;
+  color: white;
 }
 
 .nav-strip {
-    background: #A43F3F;
-    display: flex;
-    flex: 1;
-    flex-direction: row;
+  background: #a43f3f;
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+}
+
+.nav-wrapper {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.auth-section {
+  color: white;
+  background: black;
+  text-align: center;
 }
