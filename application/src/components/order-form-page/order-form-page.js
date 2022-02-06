@@ -6,7 +6,7 @@ import './orderForm.css';
 
 const ADD_ORDER_URL = `${SERVER_IP}/api/add-order`;
 
-export default function OrderForm(props) {
+export default function OrderFormPage(props) {
     const [orderItem, setOrderItem] = useState("");
     const [quantity, setQuantity] = useState("1");
 
