@@ -4,10 +4,12 @@ import { SERVER_IP } from "../../private";
 import "./orderForm.css";
 
 const ADD_ORDER_URL = `${SERVER_IP}/api/add-order`;
+const EDIT_ORDER_URL = `${SERVER_IP}/api/edit-order`;
 
-export default function OrderForm(props) {
-  const [orderItem, setOrderItem] = useState("");
-  const [quantity, setQuantity] = useState("1");
+const OrderForm = (props) => {
+  const isEditing = props.order._id !== "";
+  const [orderItem, setOrderItem] = useState(props.order.order_item);
+  const [quantity, setQuantity] = useState(props.order.quantity);
 
   const menuItemChosen = (event) => setOrderItem(event.target.value);
   const menuQuantityChosen = (event) => setQuantity(event.target.value);
@@ -16,6 +18,15 @@ export default function OrderForm(props) {
 
   const submitOrder = () => {
     if (orderItem === "") return;
+
+    if (isEditing) {
+      editOrder();
+    } else {
+      createOrder();
+    }
+  };
+
+  const createOrder = () => {
     fetch(ADD_ORDER_URL, {
       method: "POST",
       body: JSON.stringify({
@@ -32,10 +43,33 @@ export default function OrderForm(props) {
       .catch((error) => console.error(error));
   };
 
+  const editOrder = () => {
+    fetch(EDIT_ORDER_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        id: props.order._id,
+        order_item: orderItem,
+        quantity,
+        ordered_by: props.order.ordered_by,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        props.onEditSuccess();
+        console.log("Success", JSON.stringify(response));
+      })
+      .catch((error) => console.error(error));
+  };
+
   return (
     <div className="form-wrapper">
       <form>
-        <label className="form-label">I'd like to order...</label>
+        <label className="form-label">
+          {!isEditing ? "I'd like to order..." : "Edit Order"}
+        </label>
         <br />
         <select
           value={orderItem}
@@ -72,9 +106,31 @@ export default function OrderForm(props) {
           className="order-btn"
           onClick={() => submitOrder()}
         >
-          Order It!
+          {!isEditing ? "Order It!" : "Update"}
         </button>
+        {isEditing && (
+          <button
+            type="button"
+            className="order-btn btn-danger"
+            onClick={props.onCancelEdit}
+          >
+            Cancel
+          </button>
+        )}
       </form>
     </div>
   );
-}
+};
+
+OrderForm.defaultProps = {
+  order: {
+    _id: "",
+    order_item: "",
+    ordered_by: "",
+    quantity: 1,
+  },
+  onEditSuccess: () => {},
+  onCancelEdit: () => {},
+};
+
+export default OrderForm;
