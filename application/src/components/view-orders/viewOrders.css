@@ -54,3 +54,18 @@
   width: 100%;
   background-color: rgba(255, 255, 255, 0.5);
 }
+
+.settings-section {
+  padding: 20px;
+  text-align: center;
+}
+
+.settings-section label {
+  margin-right: 25px;
+  margin-left: 5px;
+}
+
+.settings-section input[type="number"] {
+  width: 50px;
+  padding: 0;
+}
