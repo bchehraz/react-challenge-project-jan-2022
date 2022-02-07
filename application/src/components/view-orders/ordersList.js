@@ -1,8 +1,13 @@
 import React, { useState } from "react";
+import { connect } from "react-redux";
 import { OrderForm } from "../";
-import { SERVER_IP } from "../../private";
+import { deleteOrder } from "../../redux/actions/orderActions";
 
-const DELETE_ORDER_URL = `${SERVER_IP}/api/delete-order`;
+const mapActionsToProps = (dispatch) => ({
+  deleteOrder(orderId) {
+    dispatch(deleteOrder(orderId));
+  },
+});
 
 const OrdersList = (props) => {
   // index of selected order to edit, -1 to cancel
@@ -16,20 +21,6 @@ const OrdersList = (props) => {
       </div>
     );
 
-  async function deleteOrder(orderId) {
-    await fetch(DELETE_ORDER_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        id: orderId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    props.fetchOrders();
-  }
-
   function showEdit(orderIndex) {
     setEditIndex(orderIndex);
   }
@@ -38,8 +29,7 @@ const OrdersList = (props) => {
     setEditIndex(-1);
   }
 
-  async function onEditSuccess() {
-    await props.fetchOrders();
+  function onEditSuccess() {
     hideEdit();
   }
 
@@ -66,7 +56,7 @@ const OrdersList = (props) => {
           )}
           <button
             className="btn btn-danger"
-            onClick={() => deleteOrder(order._id)}
+            onClick={() => props.deleteOrder(order._id)}
           >
             Delete
           </button>
@@ -88,7 +78,6 @@ const OrdersList = (props) => {
 
 OrdersList.defaultProps = {
   orders: [], // Array of Order objects
-  fetchOrders: () => {}, // Function to refresh the orders list
 };
 
-export default OrdersList;
+export default connect(null, mapActionsToProps)(OrdersList);
