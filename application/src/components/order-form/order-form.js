@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { SERVER_IP } from "../../private";
+import { useSelector, connect } from "react-redux";
 import "./orderForm.css";
+import { addOrder, editOrder } from "../../redux/actions/orderActions";
 
-const ADD_ORDER_URL = `${SERVER_IP}/api/add-order`;
-const EDIT_ORDER_URL = `${SERVER_IP}/api/edit-order`;
+const mapActionsToProps = (dispatch) => ({
+  addOrder(orderItem, quantity, orderedBy) {
+    dispatch(addOrder(orderItem, quantity, orderedBy));
+  },
+  editOrder(orderId, orderItem, quantity, orderedBy) {
+    return dispatch(editOrder(orderId, orderItem, quantity, orderedBy));
+  },
+});
 
 const OrderForm = (props) => {
   const isEditing = props.order._id !== "";
@@ -16,52 +22,25 @@ const OrderForm = (props) => {
 
   const auth = useSelector((state) => state.auth);
 
-  const submitOrder = () => {
+  const submitOrder = async () => {
     if (orderItem === "") return;
 
     if (isEditing) {
-      editOrder();
-    } else {
-      createOrder();
-    }
-  };
+      try {
+        await props.editOrder(
+          props.order._id,
+          orderItem,
+          quantity,
+          props.order.ordered_by
+        );
 
-  const createOrder = () => {
-    fetch(ADD_ORDER_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        order_item: orderItem,
-        quantity,
-        ordered_by: auth.email || "Unknown!",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((response) => console.log("Success", JSON.stringify(response)))
-      .catch((error) => console.error(error));
-  };
-
-  const editOrder = () => {
-    fetch(EDIT_ORDER_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        id: props.order._id,
-        order_item: orderItem,
-        quantity,
-        ordered_by: props.order.ordered_by,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((response) => {
         props.onEditSuccess();
-        console.log("Success", JSON.stringify(response));
-      })
-      .catch((error) => console.error(error));
+      } catch (err) {
+        throw err;
+      }
+    } else {
+      props.addOrder(orderItem, quantity, auth.email);
+    }
   };
 
   return (
@@ -133,4 +112,4 @@ OrderForm.defaultProps = {
   onCancelEdit: () => {},
 };
 
-export default OrderForm;
+export default connect(null, mapActionsToProps)(OrderForm);
