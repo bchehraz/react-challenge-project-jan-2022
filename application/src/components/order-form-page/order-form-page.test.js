@@ -4,14 +4,14 @@ import { MemoryRouter } from 'react-router';
 import { Provider } from 'react-redux';
 import store from '../../redux/store';
 
-import OrderForm from './order-form';
+import OrderFormPage from './order-form-page';
 
-describe('Order Form', () => {
-    test('renders order form', () => {
+describe('Order Form Page', () => {
+    test('renders order form page', () => {
         render(
             <Provider store={store}>
                 <MemoryRouter>
-                    <OrderForm />
+                    <OrderFormPage />
                 </MemoryRouter>
             </Provider>
         );
