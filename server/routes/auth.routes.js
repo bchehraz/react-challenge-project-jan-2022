@@ -1,20 +1,52 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
 const router = express.Router();
 
 // login expects email/password
-// successful login returns email and a fake token (if we ever want to use it)
-router.post("/login", (req, res) => {
+// successful login returns email and a real JWT
+router.post("/login", async (req, res) => {
   try {
     if (!req.body || !req.body.email || !req.body.password) {
       res.status(401).json({ success: false, error: "Bad login information" });
       return;
     }
-    res
-      .status(200)
-      .json({ success: true, email: req.body.email, token: "12345luggage" });
+
+    req.body.email = req.body.email.toLowerCase();
+
+    const { email, password } = req.body;
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        error: "The email or password entered is incorrect",
+      });
+      return;
+    }
+
+    // Check if password matches
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      res.status(401).json({
+        success: false,
+        error: "The email or password entered is incorrect",
+      });
+      return;
+    }
+
+    // Generate a JSON Web Token
+    const token = jwt.sign(
+      { userId: user.id, email },
+      process.env.AUTH_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({ success: true, email, token }); // login success
+    return;
   } catch (error) {
     res.status(500).json({ success: false, error: "Unknown error" });
   }
